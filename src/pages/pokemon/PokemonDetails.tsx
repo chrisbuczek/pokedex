@@ -14,11 +14,7 @@ import { useFetchPokemonDetails } from "../../hooks/api/useFetchPokemonDetails";
 
 export const PokemonDetails = () => {
   const { idOrName } = useParams();
-  const {
-    data: pokemon,
-    loading,
-    error,
-  } = useFetchPokemonDetails({ idOrName });
+  const { data: pokemon, loading, error } = useFetchPokemonDetails({ idOrName });
 
   if (loading) {
     return <CircularProgress />;
@@ -38,16 +34,11 @@ export const PokemonDetails = () => {
 
   return (
     <Container>
-      <Button component={NavLink} to="/" variant="outlined" sx={{ mb: 2 }}>
+      <Button component={NavLink} variant="contained" to="/">
         Back to List
       </Button>
       <Card>
-        <Typography
-          gutterBottom
-          variant="h2"
-          component="div"
-          sx={{ textTransform: "capitalize" }}
-        >
+        <Typography gutterBottom variant="h2" component="div" sx={{ textTransform: "capitalize" }}>
           {pokemon.name}
         </Typography>
 
@@ -65,11 +56,7 @@ export const PokemonDetails = () => {
               Types
             </Typography>
             {pokemon.types.map((typeInfo) => (
-              <Chip
-                label={typeInfo.type.name}
-                key={typeInfo.type.name}
-                sx={{ mr: 1, textTransform: "capitalize" }}
-              />
+              <Chip label={typeInfo.type.name} key={typeInfo.type.name} sx={{ mr: 1, textTransform: "capitalize" }} />
             ))}
           </Box>
 
@@ -99,9 +86,7 @@ export const PokemonDetails = () => {
                   maxWidth: "170px",
                 }}
               >
-                <Typography sx={{ textTransform: "capitalize" }}>
-                  {statInfo.stat.name}
-                </Typography>
+                <Typography sx={{ textTransform: "capitalize" }}>{statInfo.stat.name}</Typography>
                 <Typography>{statInfo.base_stat}</Typography>
               </Box>
             ))}

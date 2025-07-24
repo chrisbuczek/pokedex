@@ -5,8 +5,7 @@ export const useIsPageBottom = ({ loadingData }: { loadingData: boolean }) => {
   useEffect(() => {
     const handleScroll = () => {
       if (
-        window.innerHeight + document.documentElement.scrollTop >=
-          document.documentElement.offsetHeight - 100 &&
+        window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 100 &&
         !loadingData
       ) {
         setIsPageBottom(true);

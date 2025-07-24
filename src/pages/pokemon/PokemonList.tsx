@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  Card,
-  CardContent,
-  Typography,
-  CircularProgress,
-  CardMedia,
-} from "@mui/material";
+import { Card, CardContent, Typography, CircularProgress, CardMedia } from "@mui/material";
 import { NavLink, useSearchParams } from "react-router";
 import { useFetchPokemonList } from "../../hooks/api";
 import { useIsPageBottom } from "../../hooks/useIsPageBottom";
@@ -19,41 +13,50 @@ interface PokemonDetails {
 
 export const PokemonList = () => {
   const [searchParams] = useSearchParams();
-  const [pokemonDetails, setPokemonDetails] = useState<Record<
-    string,
-    PokemonDetails
-  > | null>(null);
+  const [pokemonDetails, setPokemonDetails] = useState<Record<string, PokemonDetails> | null>(null);
   const [offset, setOffset] = useState<number>(0);
-  const {
-    data: pokemonList,
-    loading,
-    error,
-  } = useFetchPokemonList({ limit: 50, offset: offset });
+
+  const { data: pokemonList, loading, error } = useFetchPokemonList({ limit: 50, offset: offset });
   const isPageBottom = useIsPageBottom({ loadingData: loading });
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchPokemonDetails = async () => {
       if (pokemonList) {
-        const newPokemons = pokemonList.filter(
-          (p) => !pokemonDetails?.[p.name]
-        );
-        if (newPokemons.length === 0) return;
+        const newPokemonsList = pokemonList.filter((pokemon) => !pokemonDetails?.[pokemon.name]);
+        if (newPokemonsList.length === 0) return;
 
-        const details = await Promise.all(
-          pokemonList.map(async (pokemon) => {
-            const response = await fetch(pokemon.url);
-            const data = await response.json();
-            return { [pokemon.name]: data };
-          })
-        );
-        setPokemonDetails((prevDetails) => ({
-          ...prevDetails,
-          ...Object.assign({}, ...details),
-        }));
+        try {
+          const details = await Promise.all(
+            newPokemonsList.map(async (pokemon) => {
+              const response = await fetch(pokemon.url, {
+                signal: controller.signal,
+              });
+              if (!response.ok) throw new Error(`Failed to fetch ${pokemon.name}`);
+              const data = await response.json();
+              return { [pokemon.name]: data };
+            })
+          );
+
+          setPokemonDetails((prevDetails) => ({
+            ...prevDetails,
+            ...Object.assign({}, ...details),
+          }));
+        } catch (error) {
+          if (error instanceof Error && error.name !== "AbortError") {
+            console.error("Failed to fetch Pokemon details:", error);
+          }
+        }
       }
     };
+
     fetchPokemonDetails();
-  }, [pokemonList, pokemonDetails]);
+
+    return () => {
+      controller.abort();
+    };
+  }, [pokemonList]);
 
   useEffect(() => {
     if (isPageBottom) setOffset((prev) => prev + 50);
@@ -63,9 +66,7 @@ export const PokemonList = () => {
     if (!pokemonList) return [];
     if (!searchParams) return pokemonList;
 
-    return pokemonList.filter((pokemon) =>
-      pokemon.name.toLowerCase().startsWith(searchParams.get("search") || "")
-    );
+    return pokemonList.filter((pokemon) => pokemon.name.toLowerCase().startsWith(searchParams.get("search") || ""));
   }, [pokemonList, searchParams]);
 
   if ((loading || !pokemonDetails) && offset === 0) {
