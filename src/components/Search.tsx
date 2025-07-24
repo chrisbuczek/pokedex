@@ -12,13 +12,11 @@ const Search = () => {
       if (value) {
         setSearchParams({ search: value });
       } else {
-        // If the input is empty, remove the 'search' param from the URL
         searchParams.delete("search");
-        setSearchParams(searchParams);
+        setSearchParams({});
       }
-    }, 300); // 300ms debounce delay
+    }, 300);
 
-    // Cleanup the timeout if the user types again before the delay has passed
     return () => {
       clearTimeout(handler);
     };
