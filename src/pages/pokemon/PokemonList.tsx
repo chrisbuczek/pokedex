@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Card,
   CardContent,
@@ -6,7 +6,7 @@ import {
   CircularProgress,
   CardMedia,
 } from "@mui/material";
-import { NavLink } from "react-router";
+import { NavLink, useSearchParams } from "react-router";
 import { useFetchPokemonList } from "../../hooks/api";
 import { useIsPageBottom } from "../../hooks/useIsPageBottom";
 
@@ -18,6 +18,7 @@ interface PokemonDetails {
 }
 
 export const PokemonList = () => {
+  const [searchParams] = useSearchParams();
   const [pokemonDetails, setPokemonDetails] = useState<Record<
     string,
     PokemonDetails
@@ -33,6 +34,11 @@ export const PokemonList = () => {
   useEffect(() => {
     const fetchPokemonDetails = async () => {
       if (pokemonList) {
+        const newPokemons = pokemonList.filter(
+          (p) => !pokemonDetails?.[p.name]
+        );
+        if (newPokemons.length === 0) return;
+
         const details = await Promise.all(
           pokemonList.map(async (pokemon) => {
             const response = await fetch(pokemon.url);
@@ -40,7 +46,10 @@ export const PokemonList = () => {
             return { [pokemon.name]: data };
           })
         );
-        setPokemonDetails(Object.assign({}, ...details));
+        setPokemonDetails((prevDetails) => ({
+          ...prevDetails,
+          ...Object.assign({}, ...details),
+        }));
       }
     };
     fetchPokemonDetails();
@@ -49,6 +58,15 @@ export const PokemonList = () => {
   useEffect(() => {
     if (isPageBottom) setOffset((prev) => prev + 50);
   }, [isPageBottom]);
+
+  const filteredPokemonList = useMemo(() => {
+    if (!pokemonList) return [];
+    if (!searchParams) return pokemonList;
+
+    return pokemonList.filter((pokemon) =>
+      pokemon.name.toLowerCase().startsWith(searchParams.get("search") || "")
+    );
+  }, [pokemonList, searchParams]);
 
   if ((loading || !pokemonDetails) && offset === 0) {
     return (
@@ -73,7 +91,7 @@ export const PokemonList = () => {
   return (
     <>
       <div className="flex gap-4 flex-wrap items-center justify-center">
-        {pokemonList?.map((pokemon) => (
+        {filteredPokemonList?.map((pokemon) => (
           <NavLink to={`/pokemon/${pokemon.name}`} key={pokemon.name}>
             <Card className="h-[300px] w-[200px]">
               {pokemonDetails[pokemon.name] && (

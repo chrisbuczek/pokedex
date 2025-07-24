@@ -1,14 +1,14 @@
 import { BrowserRouter, Routes, Route } from "react-router";
 import { NotFound, PokemonDetails, PokemonList } from "./pages";
 import "./App.css";
+import { Navbar } from "./components";
 
 function App() {
   return (
     <main>
-      <nav className="w-full p-2 flex justify-center items-center text-[2rem]">
-        Pokedex
-      </nav>
       <BrowserRouter>
+        <Navbar />
+        <div className="h-[80px]"></div>
         <Routes>
           <Route path="/" element={<PokemonList />} />
           <Route path="pokemon">
