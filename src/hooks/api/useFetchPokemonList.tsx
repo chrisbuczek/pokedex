@@ -18,11 +18,14 @@ export const useFetchPokemonList = ({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // const controller = new AbortController();
+
     const fetchData = async () => {
       try {
         setLoading(true);
         const response = await fetch(
           `${apiUrl}/pokemon?limit=${limit}${offset ? `&offset=${offset}` : ""}`
+          //   , { signal: controller.signal }
         );
         if (!response.ok) {
           throw new Error("Error: " + response);
@@ -39,6 +42,10 @@ export const useFetchPokemonList = ({
     };
 
     fetchData();
+
+    // return () => {
+    //   controller.abort();
+    // };
   }, [limit, offset]);
 
   return { data, loading, error };

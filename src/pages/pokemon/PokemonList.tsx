@@ -53,7 +53,7 @@ export const PokemonList = () => {
       }
     };
     fetchPokemonDetails();
-  }, [pokemonList]);
+  }, [pokemonList, pokemonDetails]);
 
   useEffect(() => {
     if (isPageBottom) setOffset((prev) => prev + 50);
