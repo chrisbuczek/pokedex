@@ -25,11 +25,15 @@ export const PokemonDetails = () => {
   }
 
   if (error) {
-    return <Typography color="error">{error}</Typography>;
+    return (
+      <Typography className="flex justify-center text-4xl" color="error">
+        {error}
+      </Typography>
+    );
   }
 
   if (!pokemon) {
-    return <Typography>No Pokémon data available.</Typography>;
+    return <Typography>No Pokemon data available.</Typography>;
   }
 
   return (
@@ -38,23 +42,24 @@ export const PokemonDetails = () => {
         Back to List
       </Button>
       <Card>
+        <Typography
+          gutterBottom
+          variant="h2"
+          component="div"
+          sx={{ textTransform: "capitalize" }}
+        >
+          {pokemon.name}
+        </Typography>
+
         <CardMedia
           component="img"
-          height="300"
+          height="140"
+          width="140"
           image={pokemon.sprites.front_default}
           alt={pokemon.name}
           sx={{ objectFit: "contain", mt: 2 }}
         />
         <CardContent>
-          <Typography
-            gutterBottom
-            variant="h2"
-            component="div"
-            sx={{ textTransform: "capitalize" }}
-          >
-            {pokemon.name}
-          </Typography>
-
           <Box sx={{ mb: 2 }}>
             <Typography variant="h5" component="div">
               Types
@@ -88,7 +93,11 @@ export const PokemonDetails = () => {
             {pokemon.stats.map((statInfo) => (
               <Box
                 key={statInfo.stat.name}
-                sx={{ display: "flex", justifyContent: "space-between" }}
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  maxWidth: "170px",
+                }}
               >
                 <Typography sx={{ textTransform: "capitalize" }}>
                   {statInfo.stat.name}

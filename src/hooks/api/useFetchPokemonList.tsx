@@ -13,7 +13,7 @@ export const useFetchPokemonList = ({
   limit?: number;
   offset?: number;
 }) => {
-  const [data, setData] = useState<Pokemon[] | null>(null);
+  const [data, setData] = useState<Pokemon[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +28,7 @@ export const useFetchPokemonList = ({
           throw new Error("Error: " + response);
         }
         const data = await response.json();
-        setData(data.results);
+        setData((prev) => [...prev, ...data.results]);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "An unknown error occurred"
