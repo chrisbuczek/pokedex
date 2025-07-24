@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useParams, Link as RouterLink } from "react-router";
+import { useParams, NavLink } from "react-router";
 import {
   CircularProgress,
   Typography,
@@ -11,60 +10,15 @@ import {
   Button,
   Container,
 } from "@mui/material";
-const apiUrl = import.meta.env.VITE_POKEAPI_URL;
-
-interface PokemonDetails {
-  name: string;
-  sprites: {
-    front_default: string;
-  };
-  types: {
-    type: {
-      name: string;
-    };
-  }[];
-  stats: {
-    base_stat: number;
-    stat: {
-      name: string;
-    };
-  }[];
-  abilities: {
-    ability: {
-      name: string;
-    };
-  }[];
-}
+import { useFetchPokemonDetails } from "../../hooks/api/useFetchPokemonDetails";
 
 export const PokemonDetails = () => {
   const { idOrName } = useParams();
-  const [pokemon, setPokemon] = useState<PokemonDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchPokemonDetail = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await fetch(`${apiUrl}/pokemon/${idOrName}`);
-        console.log("RESPONSE", response);
-        if (!response.ok) {
-          throw new Error("Pokemon not found");
-        }
-        const data = await response.json();
-        setPokemon(data);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : "An unknown error occurred"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPokemonDetail();
-  }, [idOrName]);
+  const {
+    data: pokemon,
+    loading,
+    error,
+  } = useFetchPokemonDetails({ idOrName });
 
   if (loading) {
     return <CircularProgress />;
@@ -80,7 +34,7 @@ export const PokemonDetails = () => {
 
   return (
     <Container>
-      <Button component={RouterLink} to="/" variant="outlined" sx={{ mb: 2 }}>
+      <Button component={NavLink} to="/" variant="outlined" sx={{ mb: 2 }}>
         Back to List
       </Button>
       <Card>

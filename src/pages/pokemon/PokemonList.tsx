@@ -6,8 +6,8 @@ import {
   CircularProgress,
   CardMedia,
 } from "@mui/material";
+import { NavLink } from "react-router";
 import { useFetchPokemonList } from "../../hooks/api";
-const apiUrl = import.meta.env.VITE_API_URL;
 
 interface PokemonDetails {
   name: string;
@@ -17,71 +17,66 @@ interface PokemonDetails {
 }
 
 export const PokemonList = () => {
-  // const [pokemon, setPokemon] = useState<Pokemon[]>([]);
-  // const [loading, setLoading] = useState(true);
-  const [pokemonDetails, setPokemonDetails] = useState<
-    Record<string, PokemonDetails>
-  >({});
-  const { data: pokemon, loading } = useFetchPokemonList({ limit: 50 });
-
-  // useEffect(() => {
-  //   const fetchPokemon = async () => {
-  //     try {
-  //       const response = await fetch(`${apiUrl}/pokemon?limit=50`);
-  //       const data = await response.json();
-  //       setPokemon(data.results);
-  //     } catch (error) {
-  //       console.error("Error fetching pokemon list:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchPokemon();
-  // }, []);
+  const [pokemonDetails, setPokemonDetails] = useState<Record<
+    string,
+    PokemonDetails
+  > | null>(null);
+  const {
+    data: pokemonList,
+    loading,
+    error,
+  } = useFetchPokemonList({ limit: 50 });
 
   useEffect(() => {
     const fetchPokemonDetails = async () => {
-      if (pokemon) {
+      if (pokemonList) {
         const details = await Promise.all(
-          pokemon.map(async (p) => {
-            const response = await fetch(p.url);
+          pokemonList.map(async (pokemon) => {
+            const response = await fetch(pokemon.url);
             const data = await response.json();
-            return { [p.name]: data };
+            return { [pokemon.name]: data };
           })
         );
         setPokemonDetails(Object.assign({}, ...details));
       }
     };
     fetchPokemonDetails();
-  }, [pokemon]);
+  }, [pokemonList]);
 
-  if (loading) {
-    return <CircularProgress />;
+  if (loading || !pokemonDetails) {
+    return (
+      <div className="w-full h-[100vh] flex items-center justify-center">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
   }
 
   return (
-    <div className="flex">
-      {pokemon?.map((p) => (
-        <div>
+    <div className="flex gap-4 flex-wrap items-center justify-center">
+      {pokemonList?.map((pokemon) => (
+        <NavLink to={`/pokemon/${pokemon.name}`} key={pokemon.name}>
           <Card className="h-[300px] w-[200px]">
-            {pokemonDetails[p.name] && (
+            {pokemonDetails[pokemon.name] && (
               <CardMedia
                 component="img"
                 height="140"
                 width="140"
-                image={pokemonDetails[p.name].sprites.front_default}
-                alt={p.name}
+                image={pokemonDetails[pokemon.name].sprites.front_default}
+                alt={pokemon.name}
                 sx={{ objectFit: "contain" }}
               />
             )}
             <CardContent>
-              <Typography gutterBottom variant="h5" component="div">
-                {p.name}
+              <Typography className="text-[1.3rem]" component="div">
+                {pokemon.name}
               </Typography>
             </CardContent>
           </Card>
-        </div>
+        </NavLink>
       ))}
     </div>
   );

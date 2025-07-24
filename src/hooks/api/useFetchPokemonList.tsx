@@ -28,7 +28,6 @@ export const useFetchPokemonList = ({
           throw new Error("Error: " + response);
         }
         const data = await response.json();
-        console.log(data);
         setData(data.results);
       } catch (err) {
         setError(
